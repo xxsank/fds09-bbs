@@ -4,11 +4,17 @@ import { toASCII } from 'punycode';
 const postAPI = axios.create({});
 const rootEl = document.querySelector('.root');
 
-if(localStorage.getItem('token')){
-  postAPI.defaults.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
-  rootEl.classList.add('root--authed');
+function login(token){
+  localStorage.setItem('token',token); 
+  postAPI.defaults.headers['Authorization'] = `Bearer ${token}`;
+  rootEl.classList.add('root--authed');  
 }
 
+function logout(){
+  localStorage.removeItem('token');
+  delete postAPI.defaults.headers['Authorization'];
+  rootEl.classList.remove('root--authed');
+}
 const templates = {
   postList: document.querySelector('#post-list').content,
   postItem: document.querySelector('#post-item').content,
@@ -31,9 +37,7 @@ async function indexPage(){
    })
 
    listFragment.querySelector('.post-list__logout-btn').addEventListener('click', e=>{
-     localStorage.removeItem('token');
-     delete postAPI.defaults.headers['Authorization'];
-     rootEl.classList.remove('root--authed');
+     logout();
      indexPage();
    })
 
@@ -75,9 +79,7 @@ async function loginPage(){
     };
     e.preventDefault();
     const res = await postAPI.post('http://localhost:3000/users/login',payload);
-    localStorage.setItem('token',res.data.token); 
-    postAPI.defaults.headers['Authorization'] = `Bearer ${res.data.token}`;
-    rootEl.classList.add('root--authed');  
+    login(res.data.token);  
     indexPage();
   })
   render(fragment);
@@ -106,7 +108,9 @@ async function postFormPage(){
 }
 
 
-
+if(localStorage.getItem('token')){
+  login(localStorage.getItem('token'));
+}
 
 indexPage();
 
