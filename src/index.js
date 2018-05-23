@@ -2,6 +2,10 @@ import axios from 'axios';
 
 const postAPI = axios.create({});
 
+if(localStorage.getItem('token')){
+  postAPI.defaults.headers['Authorization'] = localStorage.getItem('token');
+}
+
 const rootEl = document.querySelector('.root');
 const templates = {
   postList: document.querySelector('#post-list').content,
@@ -21,6 +25,12 @@ async function indexPage(){
   
    listFragment.querySelector('.post-list__login-btn').addEventListener('click', e=>{
     loginPage();
+   })
+
+   listFragment.querySelector('.post-list__logout-btn').addEventListener('click', e=>{
+     localStorage.removeItem('token');
+     delete postAPI.defaults.headers['Authorization'];
+     indexPage();
    })
 
    res.data.forEach(post => {
