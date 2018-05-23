@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { toASCII } from 'punycode';
 
 const postAPI = axios.create({
   baseURL: process.env.API_URL
@@ -9,7 +8,7 @@ const rootEl = document.querySelector('.root');
 function login(token){
   localStorage.setItem('token',token); 
   postAPI.defaults.headers['Authorization'] = `Bearer ${token}`;
-  rootEl.classList.add('root--authed');  
+  rootEl.classList.add('root--authed'); 
 }
 
 function logout(){
@@ -22,7 +21,8 @@ const templates = {
   postItem: document.querySelector('#post-item').content,
   postContent: document.querySelector('#post-content').content,
   login: document.querySelector('#login').content,
-  postForm: document.querySelector('#post-form').content
+  postForm: document.querySelector('#post-form').content,
+  modifyForm: document.querySelector('#modify-form').content
 }
 
 function render(fragment){
@@ -60,12 +60,21 @@ async function indexPage(){
 }
 
 async function postContentPage(postId){
-  const res = await postAPI.get(`/${postId}`);
+  const res = await postAPI.get(`/posts/${postId}`);
   const fragment = document.importNode(templates.postContent, true);
   fragment.querySelector('.post-content__title').textContent = res.data.title;
   fragment.querySelector('.post-content__body').textContent = res.data.body;
   fragment.querySelector('.post-content__back-btn').addEventListener('click', e=>{
     indexPage();
+  })
+  // ** 게시글 클릭후 나오는 페이지에서 삭제버튼 클릭시 보고있는 해당 글 삭제 ** //
+  fragment.querySelector('.post-content__delete-btn').addEventListener('click', async e=>{
+    await postAPI.delete(`/posts/${postId}`);
+    indexPage();
+  })
+    // ** 게시글 클릭후 나오는 페이지에서 수정버튼 클릭시 수정페이지로이동 ** //
+  fragment.querySelector('.post-content__modify-btn').addEventListener('click', e=>{
+    modifyFormPage(postId);
   })
   render(fragment);
 }
@@ -108,6 +117,35 @@ async function postFormPage(){
 
   render(fragment);
 }
+
+  // 수정기능 구현
+async function modifyFormPage(postId){
+  const res = await postAPI.get(`/posts/${postId}`);
+  const fragment = document.importNode(templates.modifyForm, true);
+  fragment.querySelector('.modify-form__title').value = res.data.title;
+  fragment.querySelector('.modify-form__body').value = res.data.body;
+
+  // 수정페이지에서 뒤로가기버튼 구현 , 뒤로가기를 누르면 수정하려던 원래본문으로 돌아간다
+  fragment.querySelector('.modify-form__back-btn').addEventListener('click', e=>{
+    e.preventDefault();
+    postContentPage(postId);
+  })
+  
+  // 수정페이지에서 수정 submit event 구현
+  fragment.querySelector('.modify-form').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const payload = {
+      title: e.target.elements.title.value,
+      body: e.target.elements.body.value
+    };
+    const res = await postAPI.patch(`/posts/${postId}`,payload);
+    console.log(res);
+    postContentPage(res.data.id);
+  })
+  render(fragment);
+}
+
+
 
 
 if(localStorage.getItem('token')){

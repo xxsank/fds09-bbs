@@ -25,6 +25,9 @@
   <template id="post-content">
     <div class="post-content">
       <button class="post-content__back-btn">뒤로 가기</button>
+      <!-- 게시글 내용 페이지 안에 삭제버튼 추가 -->
+      <button class="post-content__delete-btn">삭제</button> 
+      <button class="post-content__modify-btn">수정</button>                 
       <h2 class="post-content__title"></h2>
       <p class="post-content__body"></p>
     </div>
@@ -50,6 +53,17 @@
       <button class="post-form__back-btn">뒤로 가기</button>
     </form>
   </template>
+
+  <template id="modify-form">
+    <form class="modify-form">
+      <h1 class="modify-form__header">수정 하기</h1>
+      <input name="title" type="text" class="modify-form__title">
+      <textarea name="body" class="modify-form__body"></textarea>
+      <button class="modify-form__submit-btn">전송</button>
+      <button class="modify-form__back-btn">뒤로 가기</button>
+    </form>
+  </template>
+
 
   <script src="./index.js"></script>
 </body>
