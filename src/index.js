@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toASCII } from 'punycode';
 
 const postAPI = axios.create({});
 const rootEl = document.querySelector('.root');
@@ -12,7 +13,8 @@ const templates = {
   postList: document.querySelector('#post-list').content,
   postItem: document.querySelector('#post-item').content,
   postContent: document.querySelector('#post-content').content,
-  login: document.querySelector('#login').content
+  login: document.querySelector('#login').content,
+  postForm: document.querySelector('#post-form').content
 }
 
 function render(fragment){
@@ -33,6 +35,10 @@ async function indexPage(){
      delete postAPI.defaults.headers['Authorization'];
      rootEl.classList.remove('root--authed');
      indexPage();
+   })
+
+   listFragment.querySelector('.post-list__new-post-btn').addEventListener('click', e=>{
+    postFormPage();
    })
 
    res.data.forEach(post => {
@@ -76,6 +82,31 @@ async function loginPage(){
   })
   render(fragment);
 }
+
+async function postFormPage(){
+  const fragment = document.importNode(templates.postForm, true);
+  fragment.querySelector('.post-form__back-btn').addEventListener('click', e=>{
+    e.preventDefault();
+    indexPage();
+  })
+
+  fragment.querySelector('.post-form').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const payload = {
+      title: e.target.elements.title.value,
+      body: e.target.elements.body.value
+    };
+
+    const res = await postAPI.post('http://localhost:3000/posts',payload);
+    console.log(res);
+    postContentPage(res.data.id);
+  })
+
+  render(fragment);
+}
+
+
+
 
 indexPage();
 
