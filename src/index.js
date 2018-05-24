@@ -65,7 +65,9 @@ async function indexPage(){
 }
 
 async function postContentPage(postId){
+  rootEl.classList.add('root--loading');
   const res = await postAPI.get(`/posts/${postId}`);
+  rootEl.classList.remove('root--loading');
   const fragment = document.importNode(templates.postContent, true);
   fragment.querySelector('.post-content__title').textContent = res.data.title;
   fragment.querySelector('.post-content__body').textContent = res.data.body;
@@ -75,7 +77,9 @@ async function postContentPage(postId){
 
   if(localStorage.getItem('token')) {
     const commentsFragment = document.importNode(templates.comments,true);
+    rootEl.classList.add('root--loading');
     const commentsRes = await postAPI.get(`/posts/${postId}/comments`);
+    rootEl.classList.remove('root--loading');
     commentsRes.data.forEach(comment => {
       const itemFragment = document.importNode(templates.commentItem,true);
       itemFragment.querySelector('.comment-item__body').textContent = comment.body;
@@ -88,7 +92,9 @@ async function postContentPage(postId){
       const payload = {
         body: e.target.elements.body.value
       };
+      rootEl.classList.add('root--loading');
       const res = await postAPI.post(`/posts/${postId}/comments`, payload)
+      rootEl.classList.remove('root--loading');
       postContentPage(postId);
     })
     fragment.appendChild(commentsFragment);
@@ -106,7 +112,9 @@ async function loginPage(){
       password: e.target.elements.password.value
     };
     e.preventDefault();
+    rootEl.classList.add('root--loading');
     const res = await postAPI.post('/users/login',payload);
+    rootEl.classList.remove('root--loading');
     login(res.data.token);  
     indexPage();
   })
@@ -126,8 +134,9 @@ async function postFormPage(){
       title: e.target.elements.title.value,
       body: e.target.elements.body.value
     };
-
+    rootEl.classList.add('root--loading');
     const res = await postAPI.post('/posts',payload);
+    rootEl.classList.remove('root--loading');
     console.log(res);
     postContentPage(res.data.id);
   })
