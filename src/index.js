@@ -32,7 +32,7 @@ function render(fragment){
 }
 
 async function indexPage(){
-   const res = await postAPI.get('/posts');
+   const res = await postAPI.get('/posts?_expand=user');
    const listFragment = document.importNode(templates.postList, true);
   
    listFragment.querySelector('.post-list__login-btn').addEventListener('click', e=>{
@@ -50,6 +50,7 @@ async function indexPage(){
 
    res.data.forEach(post => {
      const fragment = document.importNode(templates.postItem, true);
+     fragment.querySelector('.post-item__author').textContent = post.user.username;
      const pEl = fragment.querySelector('.post-item__title');
      pEl.textContent = post.title;
      pEl.addEventListener('click', e=>{
