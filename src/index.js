@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { freemem } from 'os';
 
 const postAPI = axios.create({
   baseURL: process.env.API_URL
@@ -82,8 +83,22 @@ async function postContentPage(postId){
     rootEl.classList.remove('root--loading');
     commentsRes.data.forEach(comment => {
       const itemFragment = document.importNode(templates.commentItem,true);
-      itemFragment.querySelector('.comment-item__body').textContent = comment.body;
+      const bodyEl = itemFragment.querySelector('.comment-item__body');
+      const removeBtnEl = itemFragment.querySelector('.comment-item__remove-btn');
+      bodyEl.textContent = comment.body;
       commentsFragment.querySelector('.comments__list').appendChild(itemFragment);
+      removeBtnEl.addEventListener('click', async e=>{
+        // 낙관적업데이트
+        // p 태그 button 태그 삭제
+        bodyEl.remove();
+        removeBtnEl.remove();
+        // delete 요청 보내기
+        const res = await postAPI.delete(`/comments/${comment.id}`);
+        // 만약 요청이 실패 했을경우 원상 복구
+        /**
+         * 복잡하니 생략
+         */
+      })
     })
 
     const formEl = commentsFragment.querySelector('.comments__form');
@@ -97,6 +112,7 @@ async function postContentPage(postId){
       rootEl.classList.remove('root--loading');
       postContentPage(postId);
     })
+
     fragment.appendChild(commentsFragment);
   }
   render(fragment);
