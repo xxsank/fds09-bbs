@@ -21,7 +21,9 @@ const templates = {
   postItem: document.querySelector('#post-item').content,
   postContent: document.querySelector('#post-content').content,
   login: document.querySelector('#login').content,
-  postForm: document.querySelector('#post-form').content
+  postForm: document.querySelector('#post-form').content,
+  comments: document.querySelector('#comments').content,
+  commentItem: document.querySelector('#comment-item').content,
 }
 
 function render(fragment){
@@ -66,6 +68,17 @@ async function postContentPage(postId){
   fragment.querySelector('.post-content__back-btn').addEventListener('click', e=>{
     indexPage();
   })
+
+  if(localStorage.getItem('token')) {
+    const commentsFragment = document.importNode(templates.comments,true);
+    const commentsRes = await postAPI.get(`/posts/${postId}/comments`);
+    commentsRes.data.forEach(comment => {
+      const itemFragment = document.importNode(templates.commentItem,true);
+      itemFragment.querySelector('.comment-item__body').textContent = comment.body;
+      commentsFragment.querySelector('.comments__list').appendChild(itemFragment);
+    })
+    fragment.appendChild(commentsFragment);
+  }
   render(fragment);
 }
 
