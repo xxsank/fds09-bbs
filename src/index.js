@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { freemem } from 'os';
+
 
 const postAPI = axios.create({
   baseURL: process.env.API_URL
